@@ -1,0 +1,2 @@
+DROP INDEX idx_residents_city_id;
+DROP INDEX idx_residents_first_name;

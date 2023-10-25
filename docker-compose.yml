@@ -1,0 +1,36 @@
+version: "3.8"
+
+networks:
+  test-project-net:
+    driver: bridge
+
+services: 
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./tmp/postgres/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test-project
+    networks:
+      - test-project-net
+
+
+  migrations:
+    image: migrate/migrate
+    container_name: migrations
+    restart: on-failure
+    depends_on:
+      - postgres
+    volumes:
+      - ./scripts/wait-for-it.sh:/wait-for-it.sh
+      - ./migrations:/migrations
+    entrypoint: [ ]
+    command: /wait-for-it.sh  postgres:5432 -- migrate -path=/migrations/ -database postgresql://postgres:postgres@postgres:5432/test-project?sslmode=disable up
+    networks:
+      - test-project-net
